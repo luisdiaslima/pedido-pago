@@ -9,14 +9,24 @@ export default createGlobalStyle`
   }
 
   body {
-    background: #312e38;
-    color: #fff;
+    background: #fff;
+    color: black;
     -webkit-font-smoothing: antialiased;
   }
 
   body, input, button {
-    font-family: Roboto Slab, serif;
+    font-family: Poppins, serif;
     font-size: 16px;
+  }
+
+  a {
+    text-decoration: none;
+    font-size: 13px;
+    color:#22E0A1;
+  }
+
+  label {
+    color: black;
   }
 
   h1, h2, h3, h4, h5, h6 {

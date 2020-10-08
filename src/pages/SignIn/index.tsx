@@ -1,38 +1,85 @@
 import React, { useCallback, useRef } from 'react';
-import { Link, useHistory } from 'react-router-dom';
+import { useHistory, Link } from 'react-router-dom';
+import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
+import CssBaseline from '@material-ui/core/CssBaseline';
+import TextField from '@material-ui/core/TextField';
 
-import { FiLogIn, FiMail, FiLock } from 'react-icons/fi';
+import Grid from '@material-ui/core/Grid';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import { makeStyles } from '@material-ui/core/styles';
+import { AppBar, Toolbar } from '@material-ui/core';
+
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 import * as Yup from 'yup';
 
-import getValidationErrors from '../../utils/getValidationErrors';
-// Importação do AuthContext para ter acesso aos seu métodos de autenticação
-import { useAuth } from '../../hooks/auth';
-import { useToast } from '../../hooks/toast';
+import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
 
 import Input from '../../components/Input';
-import Button from '../../components/Button';
+import getValidationErrors from '../../utils/getValidationErrors';
 
-import { Container, Content, Background, AnimationContainer } from './styles';
+import { useAuth } from '../../hooks/auth';
+import { Container, Footer, FooterCopyright, MadeInSp } from './styles';
+
 import logoImg from '../../assets/logo.svg';
 
 interface SignFormData {
-  email: string;
+  username: string;
   password: string;
 }
+
+const useStyles = makeStyles(theme => ({
+  paper: {
+    marginTop: theme.spacing(-2),
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    border: '2px solid #f0f0f0',
+    borderRadius: '10px',
+    padding: '45px',
+    maxWidth: '450px',
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    background: '#034AFD',
+  },
+  form: {
+    width: '100%', // Fix IE 11 issue.
+    marginTop: theme.spacing(5),
+  },
+  submit: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'Poppins',
+    margin: theme.spacing(3, 0, 2),
+    background: '#22E0A1',
+    marginTop: theme.spacing(5),
+    '&:hover': {
+      backgroundColor: '#034AFD',
+    },
+  },
+  appbar: {
+    alignItems: 'center',
+    background: 'white',
+    boxShadow: '2px 2px 2px 1px rgba(0, 0, 0, 0.2)',
+  },
+  grid: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+}));
 
 const SignIn: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
 
-  // Chamando o método de SignIn e a const User dentro do AuthContext
+  const classes = useStyles();
+
   const { signIn } = useAuth();
   const history = useHistory();
 
-  // Chamando o método disparador de toast
-  const { addToast } = useToast();
-
-  // Função com as regras de cadastro utilizando Yup
   const handleSubmit = useCallback(
     async (data: SignFormData) => {
       try {
@@ -40,9 +87,7 @@ const SignIn: React.FC = () => {
 
         // Validando o formulário com um schema
         const schema = Yup.object().shape({
-          email: Yup.string()
-            .required('E-mail obrigatório')
-            .email('Digite um e-mail válido'),
+          username: Yup.string().required('E-mail obrigatório'),
           password: Yup.string().required('Senha obrigatória'),
         });
 
@@ -51,60 +96,93 @@ const SignIn: React.FC = () => {
         });
 
         // Após a validação, chamar o método SignIn de dentro do AuthContext
-        await signIn({
-          email: data.email,
+        const response = await signIn({
+          username: data.username,
           password: data.password,
         });
-
+        console.log(response);
         history.push('/dashboard');
       } catch (err) {
         if (err instanceof Yup.ValidationError) {
           const errors = getValidationErrors(err);
           formRef.current?.setErrors(errors);
-
-          return;
         }
-
-        addToast({
-          type: 'error',
-          title: 'Erro na autenticação',
-          description: 'Ocorreu um erro ao fazer login, cheque as credenciais',
-        });
       }
     },
-    [signIn, addToast, history],
+    [signIn, history],
   );
 
   return (
     <Container>
-      <Content>
-        <AnimationContainer>
-          <img src={logoImg} alt="GoBarber" />
+      <AppBar color="default" className={classes.appbar}>
+        <Toolbar>
+          <img src={logoImg} alt="Logo" />
+        </Toolbar>
+      </AppBar>
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <h1>Fazer logon</h1>
+        <p>
+          Ir para a interface administrativa da
+{' '}
+<span>Pedido Pago</span>
+        </p>
+        <Form className={classes.form} onSubmit={handleSubmit}>
+          <Input
+            icon={FiUser}
+            name="username"
+            type="username"
+            placeholder="Username"
+          />
 
-          <Form ref={formRef} onSubmit={handleSubmit}>
-            <h1>Faça seu logon</h1>
+          <Input
+            icon={FiLock}
+            name="password"
+            type="password"
+            placeholder="Senha"
+          />
 
-            <Input name="email" icon={FiMail} placeholder="E-mail" />
-
-            <Input
-              name="password"
-              icon={FiLock}
-              type="password"
-              placeholder="Senha"
-            />
-
-            <Button type="submit">Entrar</Button>
-
-            <a href="forgot">Esqueci minha senha</a>
-          </Form>
-
-          <Link to="/signup">
-            <FiLogIn />
-            Criar conta
-          </Link>
-        </AnimationContainer>
-      </Content>
-      <Background />
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            className={classes.submit}
+          >
+            Entrar
+          </Button>
+          <Grid container className={classes.grid}>
+            <Grid item xs>
+              <Link to="#">
+                <p>
+                  Esqueceu sua senha?
+{' '}
+                  <label>
+                    Recebe o link de troca de senha no email cadastrado
+                  </label>
+                </p>
+              </Link>
+            </Grid>
+          </Grid>
+        </Form>
+      </div>
+      <Footer>
+        <FooterCopyright>
+          <p>C 2020 Pedido Pago </p>
+          <span>
+            | Termos Gerais e Condições de Uso | Política de Privacidade
+          </span>
+        </FooterCopyright>
+        <MadeInSp>
+          <span>Feito com</span>
+          &nbsp;
+          <FiHeart />
+          &nbsp;
+          <span>em SP</span>
+        </MadeInSp>
+      </Footer>
     </Container>
   );
 };

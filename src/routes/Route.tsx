@@ -17,15 +17,15 @@ const Route: React.FC<RouteProps> = ({
   component: Component,
   ...rest
 }) => {
-  const { user } = useAuth();
+  const { company_id } = useAuth();
 
-  console.log(user, isPrivate);
+  console.log(company_id, isPrivate);
 
   return (
     <ReactDOMRoute
       {...rest}
       render={({ location }) => {
-        return isPrivate === !!user ? (
+        return isPrivate === !!company_id ? (
           <Component />
         ) : (
           <Redirect
