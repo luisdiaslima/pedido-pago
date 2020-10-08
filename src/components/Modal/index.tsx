@@ -1,16 +1,40 @@
-import React from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { Link } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Modal, Avatar, Button, Grid } from '@material-ui/core';
+
 import { Form } from '@unform/web';
+import { FormHandles } from '@unform/core';
+
 import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 
-import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
+import { FiLock, FiUser } from 'react-icons/fi';
 
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
+import * as Yup from 'yup';
+import { useAuth } from 'hooks/auth';
+import { useCategory } from '../../hooks/category';
 import Input from '../Input';
+import Select from '../Select';
+import getValidationErrors from '../../utils/getValidationErrors';
+
+interface CategoryFormData {
+  name: string;
+  description: string;
+  ecommerce_from: string;
+  ecommerce_status: boolean;
+  callcenter_from: string;
+  callcenter_status: boolean;
+
+  keywords_concat: string;
+  logo: string;
+  logo_content_type: string;
+  position: number;
+  store_id: string;
+  visible: boolean;
+}
 
 const useStyles = makeStyles(theme => ({
   modal: {
@@ -47,32 +71,67 @@ const useStyles = makeStyles(theme => ({
   },
   grid: {
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center !important',
   },
 }));
 
-export default function TransitionsModal() {
+const FormModal: React.FC = () => {
+  const formRef = useRef<FormHandles>(null);
+  const { createCategory } = useCategory();
+  const { jwt } = useAuth();
+
   const classes = useStyles();
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
 
-  const handleOpen = () => {
+  function handleOpen(): void {
     setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  function handleSubmit() {
-    console.log('oi');
   }
+
+  function handleClose(): void {
+    setOpen(false);
+  }
+
+  const handleSubmit = useCallback(
+    async (data: CategoryFormData) => {
+      try {
+        console.log('indo fazer o create');
+
+        const response = await createCategory({
+          callcenter: {
+            from: data.callcenter_from,
+            status: data.callcenter_status,
+          },
+          ecommerce: {
+            from: data.ecommerce_from,
+            status: data.ecommerce_status,
+          },
+          description: data.description,
+          keywords_concat: data.keywords_concat,
+          logo: data.logo,
+          logo_content_type: data.logo_content_type,
+          name: data.name,
+          position: data.position,
+          store_id: data.store_id,
+          visible: data.visible,
+          jwt,
+        });
+        console.log(response);
+      } catch (err) {
+        if (err instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(err);
+          formRef.current?.setErrors(errors);
+        }
+      }
+    },
+    [createCategory],
+  );
 
   return (
     <div>
-      <button type="button" onClick={handleOpen}>
-        react-transition-group
-      </button>
+      <Button className={classes.submit} type="button" onClick={handleOpen}>
+        Criar uma nova categoria
+      </Button>
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -96,20 +155,90 @@ export default function TransitionsModal() {
 {' '}
 <span>Pedido Pago</span>
             </p>
+
             <Form className={classes.form} onSubmit={handleSubmit}>
               <Input
                 icon={FiUser}
-                name="username"
-                type="username"
-                placeholder="Username"
+                name="name"
+                type="text"
+                placeholder="Nome da categoria"
               />
+              <Input
+                icon={FiUser}
+                name="description"
+                type="text"
+                placeholder="Uma descrição curta"
+              />
+              <Grid className={classes.grid}>
+                <Input
+                  icon={FiUser}
+                  name="callcenter_from"
+                  type="number"
+                  placeholder="Quentidade de callcenters"
+                />
+                <Select name="callcenter_status">
+                  <option aria-label="None" value="">
+                    Disponibilidade
+                  </option>
+                  <option value="true">Sim</option>
+                  <option value="false">Não</option>
+                </Select>
+              </Grid>
+
+              <Grid className={classes.grid}>
+                <Input
+                  icon={FiUser}
+                  name="ecommerce_from"
+                  type="number"
+                  placeholder="Quantidade de e-commerces"
+                />
+                <Select name="ecommerce_status">
+                  <option aria-label="None" value="">
+                    Disponibilidade
+                  </option>
+                  <option value="true">Sim</option>
+                  <option value="false">Não</option>
+                </Select>
+              </Grid>
 
               <Input
-                icon={FiLock}
-                name="password"
-                type="password"
-                placeholder="Senha"
+                icon={FiUser}
+                name="keywords"
+                type="text"
+                placeholder="Separe suas keys por vírgulas"
               />
+
+              <Grid className={classes.grid}>
+                <Input
+                  icon={FiUser}
+                  name="store_id"
+                  type="text"
+                  placeholder="Loja"
+                />
+                <Select name="visible">
+                  <option aria-label="None" value="">
+                    Visível p/ clientes
+                  </option>
+                  <option value="true">Sim</option>
+                  <option value="false">Não</option>
+                </Select>
+              </Grid>
+
+              <Grid className={classes.grid}>
+                <Input
+                  icon={FiUser}
+                  name="logo"
+                  type="url"
+                  placeholder="URL do logo"
+                />
+
+                <Input
+                  icon={FiUser}
+                  name="logo_content_type"
+                  type="text"
+                  placeholder="Tipo da imagem"
+                />
+              </Grid>
 
               <Button
                 type="submit"
@@ -117,25 +246,14 @@ export default function TransitionsModal() {
                 variant="contained"
                 className={classes.submit}
               >
-                Entrar
+                Cadastrar
               </Button>
-              <Grid container className={classes.grid}>
-                <Grid item xs>
-                  <Link to="#">
-                    <p>
-                      Esqueceu sua senha?
-{' '}
-                      <label>
-                        Recebe o link de troca de senha no email cadastrado
-                      </label>
-                    </p>
-                  </Link>
-                </Grid>
-              </Grid>
             </Form>
           </div>
         </Fade>
       </Modal>
     </div>
   );
-}
+};
+
+export default FormModal;

@@ -2,16 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import {
-  Table,
-  TableContainer,
-  TableHead,
-  TableCell,
-  TableBody,
-  TableRow,
-  AppBar,
-  Toolbar,
-} from '@material-ui/core';
+import { Grid, AppBar, Toolbar } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { Form } from '@unform/web';
@@ -22,6 +13,7 @@ import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
 
 import api from 'services/api';
 import Modal from '../../components/Modal';
+import TableDashboard from '../../components/Table';
 
 import { useAuth } from '../../hooks/auth';
 import { Container, Footer, FooterCopyright, MadeInSp } from './styles';
@@ -66,18 +58,24 @@ const useStyles = makeStyles(theme => ({
     background: '#22E0A1',
     marginTop: theme.spacing(5),
     '&:hover': {
-      backgroundColor: '#034AFD',
+      background: '#034AFD',
     },
   },
   appbar: {
     alignItems: 'center',
-    background: 'white',
+    background: 'linear-gradient(90.17deg, #22E0A1 0%, #034AFD 100%)',
     boxShadow: '2px 2px 2px 1px rgba(0, 0, 0, 0.2)',
   },
   grid: {
+    width: '100%',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  container: {
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '20px',
   },
 }));
 
@@ -86,9 +84,8 @@ const Dashboard: React.FC = () => {
   const [categories, setCategories] = useState([]);
 
   const classes = useStyles();
-  const { jwt } = useAuth();
 
-  const { signIn } = useAuth();
+  const { signIn, jwt } = useAuth();
   const history = useHistory();
 
   useEffect(() => {
@@ -98,8 +95,38 @@ const Dashboard: React.FC = () => {
     });
   }, []);
 
+  async function handleSubmit(): Promise<void> {
+    try {
+      formRef.current?.setErrors({});
+      await api.post('/v2/store/category', {
+        name: 'Roupas',
+        callcenter: {
+          from: 2,
+          status: true,
+        },
+        description: 'roupas...',
+        ecommerce: {
+          from: 4,
+          status: true,
+        },
+        keywords: ['teste', 'teste1'],
+        keywords_concat: 'teste0',
+        logo: 'www.teste.com',
+        logo_content_type: 'url',
+        position: 2,
+        parent_id: 9,
+        store_id: '388747374j',
+        products: ['blusa'],
+
+        visible: true,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   return (
-    <Container>
+    <Container className={classes.container}>
       <AppBar color="default" className={classes.appbar}>
         <Toolbar>
           <img src={logoImg} alt="Logo" />
@@ -107,24 +134,16 @@ const Dashboard: React.FC = () => {
       </AppBar>
       <CssBaseline />
 
-      <TableContainer>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Categoria</TableCell>
-              <TableCell>Ações</TableCell>
-            </TableRow>
-          </TableHead>
+      <Grid className={classes.grid}>
+        <h1>Lista de Categorias</h1>
+        <Modal />
+      </Grid>
 
-          <TableBody>
-            <TableRow>
-              <TableCell>oi</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <TableDashboard />
 
-      <Modal />
+      <Button className={classes.submit} onClick={handleSubmit}>
+        Submiter
+      </Button>
       <Footer>
         <FooterCopyright>
           <p>C 2020 Pedido Pago </p>
