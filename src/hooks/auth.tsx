@@ -19,6 +19,7 @@ interface AuthState {
 
 interface AuthContextData {
   company_id: object;
+  jwt: string;
   signIn(credentails: SignInCredentials): Promise<void>;
   signOut(): void;
 }
@@ -63,7 +64,7 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   return (
     <AuthContext.Provider
-      value={{ company_id: data.company_id, signIn, signOut }}
+      value={{ company_id: data.company_id, jwt: data.jwt, signIn, signOut }}
     >
       {children}
     </AuthContext.Provider>
