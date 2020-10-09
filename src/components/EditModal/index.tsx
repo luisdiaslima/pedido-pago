@@ -1,5 +1,4 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Modal, Avatar, Button, Grid } from '@material-ui/core';
@@ -7,43 +6,28 @@ import { Modal, Avatar, Button, Grid } from '@material-ui/core';
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
 
-import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
-
-import { FiLock, FiUser } from 'react-icons/fi';
+import { FiUser } from 'react-icons/fi';
 
 import Backdrop from '@material-ui/core/Backdrop';
 import Fade from '@material-ui/core/Fade';
-import * as Yup from 'yup';
 import { useAuth } from 'hooks/auth';
 import api from 'services/api';
-import { IndexType } from 'typescript';
 import EditIcon from '@material-ui/icons/Edit';
 import { useCategory } from '../../hooks/category';
 import Input from '../Input';
 import Select from '../Select';
 
-import getValidationErrors from '../../utils/getValidationErrors';
-
 export interface EditItem {
-  id: string;
+  id: number;
 }
 
 interface CategoryItem {
-  callcenter: {
-    status: boolean;
-    from: number;
-  };
   created_at: number;
   description: string;
-  ecommerce: {
-    status: boolean;
-    from: number;
-  };
-  id: string;
-  is_root: boolean;
+  id: number;
   name: string;
+  logo: string;
   store_id: string;
-  visible: boolean;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -98,9 +82,7 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const EditModal: React.FC<EditItem> = (id: EditItem) => {
-  const formRef = useRef<FormHandles>(null);
   const { getCategory } = useCategory();
-
   const { jwt } = useAuth();
   api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
@@ -113,9 +95,6 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
       setOpen(true);
       const response = await getCategory(id);
       setCategories(response.data);
-      console.log(response.data); // Isto retorna um objeto
-
-      console.log(categories); // Isto retorna um objeto vazio
     } catch (err) {
       console.log(err);
     }
@@ -125,8 +104,18 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
     setOpen(false);
   }
 
-  async function handleSubmit(): Promise<void> {
-    console.log('testando');
+  async function handleSubmit(data: CategoryItem): Promise<void> {
+    try {
+      await api.put(`v2/store/category/${categories?.id}`, {
+        name: data.name,
+        description: data.description,
+        logo: data.logo,
+        store_id: data.store_id,
+      });
+      console.log('deu');
+    } catch (err) {
+      console.log(err);
+    }
   }
 
   return (
@@ -155,7 +144,6 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
               <h1>Editar Categoria</h1>
               <p>
                 Edite sua categoria de acordo
-{' '}
                 <span>com as credencias a baixo</span>
               </p>
             </Grid>
@@ -165,52 +153,15 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
                 icon={FiUser}
                 name="name"
                 type="text"
-                value={categories ? categories.name : ''}
+                defaultValue={categories ? categories.name : ''}
                 placeholder="Nome da categoria"
               />
               <Input
                 icon={FiUser}
                 name="description"
                 type="text"
+                defaultValue={categories ? categories.description : ''}
                 placeholder="Uma descrição curta"
-              />
-              <Grid className={classes.grid}>
-                <Input
-                  icon={FiUser}
-                  name="callcenter_from"
-                  type="number"
-                  placeholder="Quentidade de callcenters"
-                />
-                <Select name="callcenter_status">
-                  <option aria-label="None" value="">
-                    Disponibilidade
-                  </option>
-                  <option value="true">Sim</option>
-                  <option value="false">Não</option>
-                </Select>
-              </Grid>
-
-              <Grid className={classes.grid}>
-                <Input
-                  icon={FiUser}
-                  name="ecommerce_from"
-                  type="number"
-                  placeholder="Quantidade de e-commerces"
-                />
-                <Select name="ecommerce_status">
-                  <option aria-label="None" value="">
-                    Disponibilidade
-                  </option>
-                  <option value="true">Sim</option>
-                  <option value="false">Não</option>
-                </Select>
-              </Grid>
-
-              <Input
-                icon={FiUser}
-                name="keywords"
-                type="text"
-                placeholder="Separe suas keys por vírgulas"
               />
 
               <Grid className={classes.grid}>
@@ -218,32 +169,18 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
                   icon={FiUser}
                   name="store_id"
                   type="text"
+                  defaultValue={categories ? categories.store_id : ''}
                   placeholder="Loja"
                 />
-                <Select name="visible">
-                  <option aria-label="None" value="">
-                    Visível p/ clientes
-                  </option>
-                  <option value="true">Sim</option>
-                  <option value="false">Não</option>
-                </Select>
               </Grid>
 
-              <Grid className={classes.grid}>
-                <Input
-                  icon={FiUser}
-                  name="logo"
-                  type="url"
-                  placeholder="URL do logo"
-                />
-
-                <Input
-                  icon={FiUser}
-                  name="logo_content_type"
-                  type="text"
-                  placeholder="Tipo da imagem"
-                />
-              </Grid>
+              <Input
+                icon={FiUser}
+                name="logo"
+                defaultValue={categories ? categories.logo : ''}
+                type="url"
+                placeholder="URL do logo"
+              />
 
               <Button
                 type="submit"
@@ -251,7 +188,7 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
                 variant="contained"
                 className={classes.submit}
               >
-                Cadastrar
+                Editar
               </Button>
             </Form>
           </div>

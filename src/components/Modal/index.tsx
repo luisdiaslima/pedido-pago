@@ -24,17 +24,8 @@ import getValidationErrors from '../../utils/getValidationErrors';
 interface CategoryFormData {
   name: string;
   description: string;
-  ecommerce_from: string;
-  ecommerce_status: boolean;
-  callcenter_from: string;
-  callcenter_status: boolean;
-
-  keywords_concat: string;
   logo: string;
-  logo_content_type: string;
-  position: number;
   store_id: string;
-  visible: boolean;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -103,35 +94,20 @@ const FormModal: React.FC = () => {
   const handleSubmit = useCallback(
     async (data: CategoryFormData) => {
       try {
-        console.log('indo fazer o create');
-
         const response = await createCategory({
-          callcenter: {
-            from: data.callcenter_from,
-            status: data.callcenter_status,
-          },
-          ecommerce: {
-            from: data.ecommerce_from,
-            status: data.ecommerce_status,
-          },
-          description: data.description,
-          keywords_concat: data.keywords_concat,
-          logo: data.logo,
-          logo_content_type: data.logo_content_type,
           name: data.name,
-          position: data.position,
+          description: data.description,
+          logo: data.logo,
           store_id: data.store_id,
-          visible: data.visible,
         });
         console.log(response);
       } catch (err) {
-        if (err instanceof Yup.ValidationError) {
-          const errors = getValidationErrors(err);
-          formRef.current?.setErrors(errors);
+        if (err) {
+          console.log(err);
         }
       }
     },
-    [createCategory],
+    [jwt],
   );
 
   return (
@@ -168,41 +144,6 @@ const FormModal: React.FC = () => {
                 type="text"
                 placeholder="Uma descrição curta"
               />
-              <Grid className={classes.grid}>
-                <Input
-                  name="callcenter_from"
-                  type="number"
-                  placeholder="Quantidade de callcenters"
-                />
-                <Select name="callcenter_status">
-                  <option aria-label="None" value="">
-                    Disponibilidade
-                  </option>
-                  <option value="true">Sim</option>
-                  <option value="false">Não</option>
-                </Select>
-              </Grid>
-
-              <Grid className={classes.grid}>
-                <Input
-                  name="ecommerce_from"
-                  type="number"
-                  placeholder="Quantidade de e-commerces"
-                />
-                <Select name="ecommerce_status">
-                  <option aria-label="None" value="">
-                    Disponibilidade
-                  </option>
-                  <option value="true">Sim</option>
-                  <option value="false">Não</option>
-                </Select>
-              </Grid>
-
-              <Input
-                name="keywords"
-                type="text"
-                placeholder="Separe suas keys por vírgulas"
-              />
 
               <Grid className={classes.grid}>
                 <Input name="store_id" type="text" placeholder="Loja" />
@@ -215,15 +156,12 @@ const FormModal: React.FC = () => {
                 </Select>
               </Grid>
 
-              <Grid className={classes.grid}>
-                <Input name="logo" type="url" placeholder="URL do logo" />
-
-                <Input
-                  name="logo_content_type"
-                  type="text"
-                  placeholder="Tipo da imagem"
-                />
-              </Grid>
+              <Input
+                name="logo"
+                type="text"
+                placeholder="URL do logo"
+                formNoValidate
+              />
 
               <Button
                 type="submit"

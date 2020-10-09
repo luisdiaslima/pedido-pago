@@ -18,18 +18,12 @@ import { makeStyles } from '@material-ui/core/styles';
 
 import { Form } from '@unform/web';
 import { FormHandles } from '@unform/core';
-import * as Yup from 'yup';
-
-import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
 
 import api from 'services/api';
-import EditIcon from '@material-ui/icons/Edit';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import { useAuth } from 'hooks/auth';
 import EditModal from 'components/EditModal';
-import { IndexInfo, IndexType } from 'typescript';
 import Modal from '../../components/Modal';
-
+import { useCategory } from '../../hooks/category';
 import { Container, Footer, FooterCopyright, MadeInSp } from './styles';
 
 import logoImg from '../../assets/logo.svg';
@@ -82,10 +76,9 @@ const useStyles = makeStyles(theme => ({
 }));
 
 interface CategoryItem {
-  id: string;
+  id: number;
   name: string;
   created_at: string;
-  dateFormated: string;
 }
 
 const Dashboard: React.FC = () => {
@@ -93,17 +86,25 @@ const Dashboard: React.FC = () => {
   const [categories, setCategories] = useState<CategoryItem[]>([]);
 
   const classes = useStyles();
+  const { removeCategory } = useCategory();
 
-  // const { jwt } = useAuth();
   const jwt = localStorage.getItem('@PedidosPago:Authorization');
   api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
   useEffect(() => {
     api.get('v2/store/category').then(response => {
       setCategories(response.data.items);
-      console.log(response.data.items);
     });
-  }, []);
+  }, [categories]);
+
+  async function handleDelete(id: number): Promise<void> {
+    try {
+      const response = await removeCategory(id);
+      console.log(response);
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
   async function handleSubmit(): Promise<void> {
     try {
@@ -174,7 +175,10 @@ const Dashboard: React.FC = () => {
                   }}
                 >
                   <EditModal id={category.id} />
-                  <HighlightOffIcon className={classes.svg} />
+                  <HighlightOffIcon
+                    className={classes.svg}
+                    onClick={() => handleDelete(category.id)}
+                  />
                 </TableCell>
               </TableRow>
             ))}
@@ -182,7 +186,9 @@ const Dashboard: React.FC = () => {
         </Table>
       </TableContainer>
 
-      <Button className={classes.submit}>Submiter</Button>
+      <Button className={classes.submit} onClick={handleSubmit}>
+        Submiter
+      </Button>
     </Container>
   );
 };
