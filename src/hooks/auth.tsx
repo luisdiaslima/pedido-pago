@@ -10,11 +10,11 @@ interface SignInCredentials {
 // Interface do meus estado
 interface AuthState {
   jwt: string;
-  company_id: object;
+  company_id: string;
 }
 
 interface AuthContextData {
-  company_id: object;
+  company_id: string;
   jwt: string;
   signIn(credentails: SignInCredentials): Promise<void>;
   signOut(): void;
@@ -25,10 +25,12 @@ const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 export const AuthProvider: React.FC = ({ children }) => {
   // Estado onde será armazenado os dados do usuário dentro da aplicação
   const [data, setData] = useState<AuthState>(() => {
-    const jwt = localStorage.getItem('@PedidosPago:Authorization');
+    const jwt = localStorage.getItem('@PedidosPago:jwt');
     const company_id = localStorage.getItem('@PedidosPago:company_id');
 
     if (jwt && company_id) {
+      console.log('tem jwt e company');
+      api.defaults.headers.Authorization = `Bearer ${jwt}`;
       return { jwt, company_id: JSON.parse(company_id) };
     }
 
@@ -45,21 +47,21 @@ export const AuthProvider: React.FC = ({ children }) => {
 
     const { jwt, company_id } = response.data;
 
-    localStorage.setItem('@PedidosPago:Authorization', jwt);
+    localStorage.setItem('@PedidosPago:jwt', jwt);
     localStorage.setItem('@PedidosPago:company_id', JSON.stringify(company_id));
 
     setData({ jwt, company_id });
   }, []);
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@PedidosPago:Authorization');
+    localStorage.removeItem('@PedidosPago:jwt');
     localStorage.removeItem('@PedidosPago:company_id');
 
     setData({} as AuthState);
   }, []);
 
   const getToken = useCallback(() => {
-    localStorage.removeItem('@PedidosPago:Authorization');
+    localStorage.removeItem('@PedidosPago:jwt');
     localStorage.removeItem('@PedidosPago:company_id');
 
     setData({} as AuthState);

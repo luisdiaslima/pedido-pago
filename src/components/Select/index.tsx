@@ -9,6 +9,7 @@ import { useField } from '@unform/core';
 
 import { IconBaseProps } from 'react-icons';
 import { FiAlertCircle } from 'react-icons/fi';
+import api from '../../services/api';
 import { Container, Error } from './styles';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
@@ -20,6 +21,8 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 // eslint-disable-next-line react/prop-types
 const Select: React.FC<SelectProps> = ({ name, ...rest }) => {
   // Referência do valor do meu campo select
+  const jwt = localStorage.getItem('@PedidosPago:Authorization');
+  api.defaults.headers.Authorization = `Bearer ${jwt}`;
   const selectRef = useRef<HTMLSelectElement>(null);
 
   const { fieldName, defaultValue, error, registerField } = useField(name);

@@ -1,5 +1,7 @@
+import { EditItem } from 'components/EditModal';
 import React, { createContext, useContext, useCallback, useState } from 'react';
 import api from '../services/api';
+import { useAuth } from './auth';
 
 interface CategoryCredentials {
   name: string;
@@ -18,7 +20,6 @@ interface CategoryCredentials {
   position: number;
   store_id: string;
   visible: boolean;
-  jwt: string;
 }
 
 interface CategoryState {
@@ -28,6 +29,7 @@ interface CategoryState {
 }
 
 interface CategoryContextData {
+  getCategory(id: EditItem): Promise<any>;
   createCategory(data: CategoryCredentials): Promise<void>;
   removeCategory(id: string): void;
   categories: CategoryState[];
@@ -41,6 +43,20 @@ export const CategoryProvider: React.FC = ({ children }) => {
   // Estado onde será armazenado todos os Category disparados
   const [categories, setCategories] = useState<CategoryState[]>([]);
 
+  const getCategory = useCallback(async ({ id }): Promise<any> => {
+    try {
+      const jwt = await localStorage.getItem('@PedidosPago:jwt');
+      const response = await api.get(`v2/store/category/${id}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
+      return response;
+    } catch (err) {
+      console.log('Request not found');
+    }
+  }, []);
+
   const createCategory = useCallback(
     async ({
       name,
@@ -53,20 +69,28 @@ export const CategoryProvider: React.FC = ({ children }) => {
       position,
       store_id,
       visible,
-      jwt,
     }) => {
-      const response = await api.post(`v2/agent/category`, {
-        name,
-        description,
-        ecommerce,
-        callcenter,
-        keyword_concat,
-        logo,
-        logo_content_type,
-        position,
-        store_id,
-        visible,
-      });
+      const jwt = await localStorage.getItem('@PedidosPago:jwt');
+      const response = await api.post(
+        `v2/store/category`,
+        {
+          name,
+          description,
+          ecommerce,
+          callcenter,
+          keyword_concat,
+          logo,
+          logo_content_type,
+          position,
+          store_id,
+          visible,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        },
+      );
 
       console.log(response);
     },
@@ -78,7 +102,7 @@ export const CategoryProvider: React.FC = ({ children }) => {
   }, []);
   return (
     <CategoryContext.Provider
-      value={{ createCategory, removeCategory, categories }}
+      value={{ getCategory, createCategory, removeCategory, categories }}
     >
       {children}
     </CategoryContext.Provider>

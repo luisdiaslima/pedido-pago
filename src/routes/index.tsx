@@ -1,11 +1,10 @@
 import React from 'react';
 import { Switch } from 'react-router-dom';
-
 import SignIn from '../pages/SignIn';
-
 import Route from './Route';
-
 import Dashboard from '../pages/Dashboard';
+
+import api from '../services/api';
 
 const Routes: React.FC = () => (
   <Switch>

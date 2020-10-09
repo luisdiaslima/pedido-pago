@@ -2,7 +2,18 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { Grid, AppBar, Toolbar } from '@material-ui/core';
+import {
+  Grid,
+  AppBar,
+  Toolbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableContainer,
+  TableRow,
+  Paper,
+} from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import { Form } from '@unform/web';
@@ -12,34 +23,25 @@ import * as Yup from 'yup';
 import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
 
 import api from 'services/api';
+import EditIcon from '@material-ui/icons/Edit';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import { useAuth } from 'hooks/auth';
+import EditModal from 'components/EditModal';
+import { IndexInfo, IndexType } from 'typescript';
 import Modal from '../../components/Modal';
-import TableDashboard from '../../components/Table';
 
-import { useAuth } from '../../hooks/auth';
 import { Container, Footer, FooterCopyright, MadeInSp } from './styles';
 
 import logoImg from '../../assets/logo.svg';
 
-interface SignFormData {
-  username: string;
-  password: string;
-}
-
-interface Category {
-  items: Array<string>;
-  total_count: number;
-}
-
 const useStyles = makeStyles(theme => ({
-  paper: {
-    marginTop: theme.spacing(-2),
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    border: '2px solid #f0f0f0',
-    borderRadius: '10px',
-    padding: '45px',
-    maxWidth: '450px',
+  table: {
+    minWidth: 650,
+  },
+  svg: {
+    color: '#A3A3A3',
+    width: '50px',
+    cursor: 'pointer',
   },
   avatar: {
     margin: theme.spacing(1),
@@ -79,19 +81,27 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
+interface CategoryItem {
+  id: string;
+  name: string;
+  created_at: string;
+  dateFormated: string;
+}
+
 const Dashboard: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<CategoryItem[]>([]);
 
   const classes = useStyles();
 
-  const { signIn, jwt } = useAuth();
-  const history = useHistory();
+  // const { jwt } = useAuth();
+  const jwt = localStorage.getItem('@PedidosPago:Authorization');
+  api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
   useEffect(() => {
     api.get('v2/store/category').then(response => {
-      setCategories(response.data);
-      console.log(categories);
+      setCategories(response.data.items);
+      console.log(response.data.items);
     });
   }, []);
 
@@ -139,26 +149,40 @@ const Dashboard: React.FC = () => {
         <Modal />
       </Grid>
 
-      <TableDashboard />
+      <TableContainer component={Paper}>
+        <Table className={classes.table} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Nome da Categorias</TableCell>
+              <TableCell align="right">Criação</TableCell>
+              <TableCell align="right">Ações</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {categories.map((category, index) => (
+              <TableRow key={category.id}>
+                <TableCell component="th" scope="row">
+                  {category.name}
+                </TableCell>
+                <TableCell align="right">{category.created_at}</TableCell>
+                <TableCell
+                  align="right"
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'right',
+                  }}
+                >
+                  <EditModal id={category.id} />
+                  <HighlightOffIcon className={classes.svg} />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
 
-      <Button className={classes.submit} onClick={handleSubmit}>
-        Submiter
-      </Button>
-      <Footer>
-        <FooterCopyright>
-          <p>C 2020 Pedido Pago </p>
-          <span>
-            | Termos Gerais e Condições de Uso | Política de Privacidade
-          </span>
-        </FooterCopyright>
-        <MadeInSp>
-          <span>Feito com</span>
-          &nbsp;
-          <FiHeart />
-          &nbsp;
-          <span>em SP</span>
-        </MadeInSp>
-      </Footer>
+      <Button className={classes.submit}>Submiter</Button>
     </Container>
   );
 };
