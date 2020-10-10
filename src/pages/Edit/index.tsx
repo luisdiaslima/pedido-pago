@@ -18,8 +18,6 @@ import { Form } from '@unform/web';
 import EditIcon from '@material-ui/icons/Edit';
 import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
-import { FiUser } from 'react-icons/fi';
-
 import api from 'services/api';
 import { useAuth } from 'hooks/auth';
 import Input from '../../components/Input';
@@ -33,8 +31,6 @@ interface CategoryItem {
   description: string;
   id: number;
   name: string;
-  logo: string;
-  store_id: string;
 }
 
 type idTransactionProp = {
@@ -120,8 +116,6 @@ const Edit: React.FC = () => {
           {
             name: data.name,
             description: data.description,
-            logo: data.logo,
-            store_id: data.store_id,
           },
           {
             headers: {
@@ -162,36 +156,16 @@ const Edit: React.FC = () => {
 
         <Form className={classes.form} onSubmit={handleSubmit}>
           <Input
-            icon={FiUser}
             name="name"
             type="text"
             defaultValue={categories ? categories.name : ''}
             placeholder="Nome da categoria"
           />
           <Input
-            icon={FiUser}
             name="description"
             type="text"
             defaultValue={categories ? categories.description : ''}
             placeholder="Uma descrição curta"
-          />
-
-          <Grid className={classes.grid}>
-            <Input
-              icon={FiUser}
-              name="store_id"
-              type="text"
-              defaultValue={categories ? categories.store_id : ''}
-              placeholder="Loja"
-            />
-          </Grid>
-
-          <Input
-            icon={FiUser}
-            name="logo"
-            defaultValue={categories ? categories.logo : ''}
-            type="url"
-            placeholder="URL do logo"
           />
 
           <Button

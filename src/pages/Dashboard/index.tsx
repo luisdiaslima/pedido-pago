@@ -12,17 +12,15 @@ import {
   TableContainer,
   TableRow,
   Paper,
-  IconButton,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import api from 'services/api';
 
-import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import EditIcon from '@material-ui/icons/Edit';
 import { useAuth } from 'hooks/auth';
-import Modal from '../../components/Modal';
+import GoCreate from '../../components/GoCreate';
 import { Container } from './styles';
 
 import logoImg from '../../assets/logo.svg';
@@ -35,26 +33,6 @@ const useStyles = makeStyles(theme => ({
     color: '#A3A3A3',
     width: '50px',
     cursor: 'pointer',
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    background: '#034AFD',
-  },
-  form: {
-    width: '100%', // Fix IE 11 issue.
-    marginTop: theme.spacing(5),
-  },
-  submit: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    fontFamily: 'Poppins',
-    margin: theme.spacing(3, 0, 2),
-    background: '#22E0A1',
-    marginTop: theme.spacing(5),
-    '&:hover': {
-      background: '#034AFD',
-    },
   },
   appbar: {
     alignItems: 'center',
@@ -76,7 +54,7 @@ const useStyles = makeStyles(theme => ({
 
 const Dashboard: React.FC = () => {
   const [categories, setCategories] = useState([
-    { id: '', name: '', created_at: '' },
+    { id: '', name: '', created_at: '', logo: '' },
   ]);
 
   const classes = useStyles();
@@ -85,7 +63,6 @@ const Dashboard: React.FC = () => {
 
   useEffect(() => {
     api.get('v2/store/category').then(response => {
-      setCategories(response.data.items);
       setCategories(response.data.items);
     });
   }, [categories]);
@@ -113,7 +90,7 @@ const Dashboard: React.FC = () => {
 
       <Grid className={classes.grid}>
         <h1>Lista de Categorias</h1>
-        <Modal />
+        <GoCreate />
       </Grid>
 
       <TableContainer component={Paper}>
@@ -128,9 +105,7 @@ const Dashboard: React.FC = () => {
           <TableBody>
             {categories.map(category => (
               <TableRow key={category.id}>
-                <TableCell component="th" scope="row">
-                  {category.name}
-                </TableCell>
+                <TableCell>{category.name}</TableCell>
                 <TableCell align="right">{category.created_at}</TableCell>
                 <TableCell
                   align="right"

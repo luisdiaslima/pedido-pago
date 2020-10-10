@@ -21,6 +21,8 @@ import api from 'services/api';
 
 import { useAuth } from 'hooks/auth';
 
+import { url } from 'inspector';
+import { Url } from 'url';
 import Select from '../../components/Select';
 import Input from '../../components/Input';
 
@@ -30,8 +32,6 @@ import logoImg from '../../assets/logo.svg';
 interface CategoryFormData {
   name: string;
   description: string;
-  logo: string;
-  store_id: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -98,13 +98,11 @@ const Edit: React.FC = () => {
   const handleSubmit = useCallback(
     async (data: CategoryFormData) => {
       try {
-        await api.post(
+        const response = await api.post(
           'v2/store/category',
           {
             name: data.name,
             description: data.description,
-            logo: data.logo,
-            store_id: data.store_id,
           },
           {
             headers: {
@@ -149,24 +147,6 @@ const Edit: React.FC = () => {
             name="description"
             type="text"
             placeholder="Uma descrição curta"
-          />
-
-          <Grid className={classes.grid}>
-            <Input name="store_id" type="text" placeholder="Loja" />
-            <Select name="visible">
-              <option aria-label="None" value="">
-                Visível p/ clientes
-              </option>
-              <option value="true">Sim</option>
-              <option value="false">Não</option>
-            </Select>
-          </Grid>
-
-          <Input
-            name="logo"
-            type="text"
-            placeholder="URL do logo"
-            formNoValidate
           />
 
           <Button
