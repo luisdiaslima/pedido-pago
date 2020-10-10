@@ -2,13 +2,20 @@ import React, { useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Form } from '@unform/web';
 
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import Grid from '@material-ui/core/Grid';
+import {
+  Grid,
+  AppBar,
+  Toolbar,
+  Button,
+  Avatar,
+  CssBaseline,
+  IconButton,
+} from '@material-ui/core';
+
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar } from '@material-ui/core';
+
 import AddCircleIcon from '@material-ui/icons/AddCircle';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
 import api from 'services/api';
 
@@ -47,6 +54,9 @@ const useStyles = makeStyles(theme => ({
     color: '#A3A3A3',
     width: '50px',
     cursor: 'pointer',
+  },
+  back: {
+    marginRight: '150px',
   },
   submit: {
     display: 'flex',
@@ -122,6 +132,9 @@ const Edit: React.FC = () => {
       </AppBar>
       <CssBaseline />
       <div className={classes.paper}>
+        <IconButton onClick={history.goBack}>
+          <ArrowBackIosIcon />
+        </IconButton>
         <Grid className={classes.gridForm}>
           <Avatar className={classes.avatar}>
             <AddCircleIcon />

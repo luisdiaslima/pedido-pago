@@ -12,10 +12,13 @@ import {
   TableContainer,
   TableRow,
   Paper,
+  IconButton,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
 import api from 'services/api';
+
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import EditIcon from '@material-ui/icons/Edit';
 import { useAuth } from 'hooks/auth';

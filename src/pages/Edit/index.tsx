@@ -1,18 +1,24 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
 
-import Grid from '@material-ui/core/Grid';
+import {
+  Grid,
+  AppBar,
+  Toolbar,
+  Button,
+  Avatar,
+  CssBaseline,
+  IconButton,
+} from '@material-ui/core';
+
 import { makeStyles } from '@material-ui/core/styles';
-import { AppBar, Toolbar } from '@material-ui/core';
 
 import { Form } from '@unform/web';
 
 import EditIcon from '@material-ui/icons/Edit';
+import ArrowBackIosIcon from '@material-ui/icons/ArrowBackIos';
 
-import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
+import { FiUser } from 'react-icons/fi';
 
 import api from 'services/api';
 import { useAuth } from 'hooks/auth';
@@ -128,7 +134,7 @@ const Edit: React.FC = () => {
         console.log(err);
       }
     },
-    [jwt, id],
+    [jwt, id, history],
   );
 
   return (
@@ -140,6 +146,9 @@ const Edit: React.FC = () => {
       </AppBar>
       <CssBaseline />
       <div className={classes.paper}>
+        <IconButton onClick={history.goBack}>
+          <ArrowBackIosIcon />
+        </IconButton>
         <Grid className={classes.gridForm}>
           <Avatar className={classes.avatar}>
             <EditIcon />
