@@ -1,5 +1,8 @@
-import React, { useCallback, useRef } from 'react';
+import React, { useCallback } from 'react';
 import { useHistory, Link } from 'react-router-dom';
+
+import { Form } from '@unform/web';
+
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import CssBaseline from '@material-ui/core/CssBaseline';
@@ -9,19 +12,12 @@ import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
 import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar } from '@material-ui/core';
 
-import { Form } from '@unform/web';
-import { FormHandles } from '@unform/core';
-import * as Yup from 'yup';
-
 import { FiLock, FiUser, FiHeart } from 'react-icons/fi';
-
+import logoImg from '../../assets/logo.svg';
 import Input from '../../components/Input';
-import getValidationErrors from '../../utils/getValidationErrors';
 
 import { useAuth } from '../../hooks/auth';
 import { Container, Footer, FooterCopyright, MadeInSp } from './styles';
-
-import logoImg from '../../assets/logo.svg';
 
 interface SignFormData {
   username: string;
@@ -72,8 +68,6 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const SignIn: React.FC = () => {
-  const formRef = useRef<FormHandles>(null);
-
   const classes = useStyles();
 
   const { signIn } = useAuth();
@@ -82,30 +76,14 @@ const SignIn: React.FC = () => {
   const handleSubmit = useCallback(
     async (data: SignFormData) => {
       try {
-        formRef.current?.setErrors({});
-
-        // Validando o formulário com um schema
-        const schema = Yup.object().shape({
-          username: Yup.string().required('E-mail obrigatório'),
-          password: Yup.string().required('Senha obrigatória'),
-        });
-
-        await schema.validate(data, {
-          abortEarly: false,
-        });
-
-        // Após a validação, chamar o método SignIn de dentro do AuthContext
-        const response = await signIn({
+        await signIn({
           username: data.username,
           password: data.password,
         });
-        console.log(response);
+
         history.push('/dashboard');
       } catch (err) {
-        if (err instanceof Yup.ValidationError) {
-          const errors = getValidationErrors(err);
-          formRef.current?.setErrors(errors);
-        }
+        console.log(err);
       }
     },
     [signIn, history],

@@ -19,8 +19,6 @@ const Route: React.FC<RouteProps> = ({
 }) => {
   const { company_id } = useAuth();
 
-  console.log(company_id, isPrivate);
-
   return (
     <ReactDOMRoute
       {...rest}

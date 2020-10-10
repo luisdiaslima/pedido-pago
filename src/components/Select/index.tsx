@@ -7,10 +7,7 @@ import React, {
 } from 'react';
 import { useField } from '@unform/core';
 
-import { IconBaseProps } from 'react-icons';
-import { FiAlertCircle } from 'react-icons/fi';
-import api from '../../services/api';
-import { Container, Error } from './styles';
+import { Container } from './styles';
 
 interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   name: string;
@@ -21,11 +18,10 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 // eslint-disable-next-line react/prop-types
 const Select: React.FC<SelectProps> = ({ name, ...rest }) => {
   // Referência do valor do meu campo select
-  const jwt = localStorage.getItem('@PedidosPago:Authorization');
-  api.defaults.headers.Authorization = `Bearer ${jwt}`;
+
   const selectRef = useRef<HTMLSelectElement>(null);
 
-  const { fieldName, defaultValue, error, registerField } = useField(name);
+  const { fieldName, error, registerField } = useField(name);
   const [isFocused, setIsFocused] = useState(false);
   const [isFilled, setIsFilled] = useState(false);
 
@@ -55,11 +51,6 @@ const Select: React.FC<SelectProps> = ({ name, ...rest }) => {
         ref={selectRef}
         {...rest}
       />
-      {error && (
-        <Error title={error}>
-          <FiAlertCircle color="#c53030" size={20} />
-        </Error>
-      )}
     </Container>
   );
 };

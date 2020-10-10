@@ -29,7 +29,6 @@ export const AuthProvider: React.FC = ({ children }) => {
     const company_id = localStorage.getItem('@PedidosPago:company_id');
 
     if (jwt && company_id) {
-      console.log('tem jwt e company');
       api.defaults.headers.Authorization = `Bearer ${jwt}`;
       return { jwt, company_id: JSON.parse(company_id) };
     }
@@ -43,8 +42,6 @@ export const AuthProvider: React.FC = ({ children }) => {
       password,
     });
 
-    console.log(response);
-
     const { jwt, company_id } = response.data;
 
     localStorage.setItem('@PedidosPago:jwt', jwt);
@@ -54,13 +51,6 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   const signOut = useCallback(() => {
-    localStorage.removeItem('@PedidosPago:jwt');
-    localStorage.removeItem('@PedidosPago:company_id');
-
-    setData({} as AuthState);
-  }, []);
-
-  const getToken = useCallback(() => {
     localStorage.removeItem('@PedidosPago:jwt');
     localStorage.removeItem('@PedidosPago:company_id');
 

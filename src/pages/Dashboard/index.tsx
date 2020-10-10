@@ -1,6 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-import Button from '@material-ui/core/Button';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {
   Grid,
@@ -16,15 +15,12 @@ import {
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
-import { Form } from '@unform/web';
-import { FormHandles } from '@unform/core';
-
 import api from 'services/api';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import EditModal from 'components/EditModal';
+import EditIcon from '@material-ui/icons/Edit';
+import { useAuth } from 'hooks/auth';
 import Modal from '../../components/Modal';
-import { useCategory } from '../../hooks/category';
-import { Container, Footer, FooterCopyright, MadeInSp } from './styles';
+import { Container } from './styles';
 
 import logoImg from '../../assets/logo.svg';
 
@@ -75,61 +71,28 @@ const useStyles = makeStyles(theme => ({
   },
 }));
 
-interface CategoryItem {
-  id: number;
-  name: string;
-  created_at: string;
-}
-
 const Dashboard: React.FC = () => {
-  const formRef = useRef<FormHandles>(null);
-  const [categories, setCategories] = useState<CategoryItem[]>([]);
+  const [categories, setCategories] = useState([
+    { id: '', name: '', created_at: '' },
+  ]);
 
   const classes = useStyles();
-  const { removeCategory } = useCategory();
-
-  const jwt = localStorage.getItem('@PedidosPago:Authorization');
+  const { jwt } = useAuth();
   api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
   useEffect(() => {
     api.get('v2/store/category').then(response => {
       setCategories(response.data.items);
+      setCategories(response.data.items);
     });
   }, [categories]);
 
-  async function handleDelete(id: number): Promise<void> {
+  async function handleDelete(id: string): Promise<void> {
     try {
-      const response = await removeCategory(id);
-      console.log(response);
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  async function handleSubmit(): Promise<void> {
-    try {
-      formRef.current?.setErrors({});
-      await api.post('/v2/store/category', {
-        name: 'Roupas',
-        callcenter: {
-          from: 2,
-          status: true,
+      api.delete(`v2/store/category/${id}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
         },
-        description: 'roupas...',
-        ecommerce: {
-          from: 4,
-          status: true,
-        },
-        keywords: ['teste', 'teste1'],
-        keywords_concat: 'teste0',
-        logo: 'www.teste.com',
-        logo_content_type: 'url',
-        position: 2,
-        parent_id: 9,
-        store_id: '388747374j',
-        products: ['blusa'],
-
-        visible: true,
       });
     } catch (err) {
       console.log(err);
@@ -160,7 +123,7 @@ const Dashboard: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map((category, index) => (
+            {categories.map(category => (
               <TableRow key={category.id}>
                 <TableCell component="th" scope="row">
                   {category.name}
@@ -174,7 +137,10 @@ const Dashboard: React.FC = () => {
                     justifyContent: 'right',
                   }}
                 >
-                  <EditModal id={category.id} />
+                  <Link to={`edit/${category.id}`}>
+                    <EditIcon />
+                  </Link>
+
                   <HighlightOffIcon
                     className={classes.svg}
                     onClick={() => handleDelete(category.id)}
@@ -185,10 +151,6 @@ const Dashboard: React.FC = () => {
           </TableBody>
         </Table>
       </TableContainer>
-
-      <Button className={classes.submit} onClick={handleSubmit}>
-        Submiter
-      </Button>
     </Container>
   );
 };

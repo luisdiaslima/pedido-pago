@@ -1,10 +1,9 @@
-import React, { useState, useCallback, useRef, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { Modal, Avatar, Button, Grid } from '@material-ui/core';
 
 import { Form } from '@unform/web';
-import { FormHandles } from '@unform/core';
 
 import { FiUser } from 'react-icons/fi';
 
@@ -13,18 +12,16 @@ import Fade from '@material-ui/core/Fade';
 import { useAuth } from 'hooks/auth';
 import api from 'services/api';
 import EditIcon from '@material-ui/icons/Edit';
-import { useCategory } from '../../hooks/category';
 import Input from '../Input';
-import Select from '../Select';
 
 export interface EditItem {
   id: number;
 }
 
 interface CategoryItem {
-  created_at: number;
+  created_at?: number;
   description: string;
-  id: number;
+  id?: number;
   name: string;
   logo: string;
   store_id: string;
@@ -82,18 +79,25 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const EditModal: React.FC<EditItem> = (id: EditItem) => {
-  const { getCategory } = useCategory();
   const { jwt } = useAuth();
-  api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
   const classes = useStyles();
   const [open, setOpen] = useState(false);
-  const [categories, setCategories] = useState<CategoryItem>();
+  const [categories, setCategories] = useState<CategoryItem>({
+    description: '',
+    name: '',
+    logo: '',
+    store_id: '',
+  });
 
   async function handleOpen(): Promise<void> {
     try {
       setOpen(true);
-      const response = await getCategory(id);
+      const response = await api.get(`v2/store/category/${id}`, {
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      });
       setCategories(response.data);
     } catch (err) {
       console.log(err);
@@ -104,19 +108,34 @@ const EditModal: React.FC<EditItem> = (id: EditItem) => {
     setOpen(false);
   }
 
-  async function handleSubmit(data: CategoryItem): Promise<void> {
-    try {
-      await api.put(`v2/store/category/${categories?.id}`, {
-        name: data.name,
-        description: data.description,
-        logo: data.logo,
-        store_id: data.store_id,
-      });
-      console.log('deu');
-    } catch (err) {
-      console.log(err);
-    }
-  }
+  const handleSubmit = useCallback(
+    async (data: CategoryItem) => {
+      try {
+        if (categories != null) {
+          const response = await api.put(
+            `v2/store/category/${categories?.id}`,
+            {
+              name: data.name,
+              description: data.description,
+              logo: data.logo,
+              store_id: data.store_id,
+            },
+            {
+              headers: {
+                Authorization: `Bearer ${jwt}`,
+              },
+            },
+          );
+          setCategories(response.data);
+        } else {
+          return;
+        }
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [categories],
+  );
 
   return (
     <div>

@@ -8,9 +8,7 @@ import React, {
 import { useField } from '@unform/core';
 
 import { IconBaseProps } from 'react-icons';
-import { FiAlertCircle } from 'react-icons/fi';
-import { Container, Error } from './styles';
-import api from '../../services/api';
+import { Container } from './styles';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   name: string;
@@ -22,8 +20,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 // eslint-disable-next-line react/prop-types
 const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
   // Referência do valor do meu campo input
-  const jwt = localStorage.getItem('@PedidosPago:Authorization');
-  api.defaults.headers.Authorization = `Bearer ${jwt}`;
+
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { fieldName, defaultValue, error, registerField } = useField(name);
@@ -57,11 +54,6 @@ const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
         ref={inputRef}
         {...rest}
       />
-      {error && (
-        <Error title={error}>
-          <FiAlertCircle color="#c53030" size={20} />
-        </Error>
-      )}
     </Container>
   );
 };
