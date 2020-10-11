@@ -59,7 +59,6 @@ const Dashboard: React.FC = () => {
 
   const classes = useStyles();
   const { jwt } = useAuth();
-  api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
   useEffect(() => {
     api.get('v2/store/category').then(response => {
@@ -97,7 +96,7 @@ const Dashboard: React.FC = () => {
         <Table className={classes.table} aria-label="simple table">
           <TableHead>
             <TableRow>
-              <TableCell>Nome da Categorias</TableCell>
+              <TableCell>Nome das Categorias</TableCell>
               <TableCell align="right">Criação</TableCell>
               <TableCell align="right">Ações</TableCell>
             </TableRow>

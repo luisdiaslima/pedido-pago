@@ -21,9 +21,6 @@ import api from 'services/api';
 
 import { useAuth } from 'hooks/auth';
 
-import { url } from 'inspector';
-import { Url } from 'url';
-import Select from '../../components/Select';
 import Input from '../../components/Input';
 
 import { Container } from './styles';
@@ -98,7 +95,7 @@ const Edit: React.FC = () => {
   const handleSubmit = useCallback(
     async (data: CategoryFormData) => {
       try {
-        const response = await api.post(
+        await api.post(
           'v2/store/category',
           {
             name: data.name,
