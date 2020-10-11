@@ -15,12 +15,7 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: React.ComponentType<IconBaseProps>;
 }
 
-// Neste componente é utilizado o unform para lidar com dados do formulário
-
-// eslint-disable-next-line react/prop-types
 const Input: React.FC<InputProps> = ({ name, icon: Icon, ...rest }) => {
-  // Referência do valor do meu campo input
-
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { fieldName, defaultValue, error, registerField } = useField(name);

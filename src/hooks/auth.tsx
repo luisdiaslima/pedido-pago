@@ -1,13 +1,11 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
 import api from '../services/api';
 
-// Interface para o método SignIn
 interface SignInCredentials {
   username: string;
   password: string;
 }
 
-// Interface do meus estado
 interface AuthState {
   jwt: string;
   company_id: string;
@@ -23,7 +21,6 @@ interface AuthContextData {
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export const AuthProvider: React.FC = ({ children }) => {
-  // Estado onde será armazenado os dados do usuário dentro da aplicação
   const [data, setData] = useState<AuthState>(() => {
     const jwt = localStorage.getItem('@PedidosPago:jwt');
     const company_id = localStorage.getItem('@PedidosPago:company_id');

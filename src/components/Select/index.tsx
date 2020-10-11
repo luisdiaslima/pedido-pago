@@ -13,12 +13,7 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   name: string;
 }
 
-// Neste componente é utilizado o unform para lidar com dados do formulário
-
-// eslint-disable-next-line react/prop-types
 const Select: React.FC<SelectProps> = ({ name, ...rest }) => {
-  // Referência do valor do meu campo select
-
   const selectRef = useRef<HTMLSelectElement>(null);
 
   const { fieldName, error, registerField } = useField(name);
