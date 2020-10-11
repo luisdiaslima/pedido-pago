@@ -61,9 +61,16 @@ const Dashboard: React.FC = () => {
   const { jwt } = useAuth();
 
   useEffect(() => {
+    let isCancelled = false;
     api.get('v2/store/category').then(response => {
-      setCategories(response.data.items);
+      if (!isCancelled) {
+        setCategories(response.data.items);
+      }
     });
+
+    return () => {
+      isCancelled = true;
+    };
   }, [categories]);
 
   async function handleDelete(id: string): Promise<void> {
