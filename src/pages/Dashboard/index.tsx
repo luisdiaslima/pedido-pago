@@ -12,6 +12,7 @@ import {
   TableContainer,
   TableRow,
   Paper,
+  Button
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -28,6 +29,18 @@ import logoImg from '../../assets/logo.svg';
 const useStyles = makeStyles(theme => ({
   table: {
     minWidth: 650,
+  },
+  submit: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontFamily: 'Poppins',
+    margin: theme.spacing(3, 0, 2),
+    background: '#22E0A1',
+    marginTop: theme.spacing(5),
+    '&:hover': {
+      backgroundColor: '#034AFD',
+    },
   },
   svg: {
     color: '#A3A3A3',
@@ -61,25 +74,22 @@ const Dashboard: React.FC = () => {
   const { jwt } = useAuth();
 
   useEffect(() => {
-    let isCancelled = false;
     api.get('v2/store/category').then(response => {
-      if (!isCancelled) {
         setCategories(response.data.items);
-      }
     });
 
-    return () => {
-      isCancelled = true;
-    };
-  }, [categories]);
+
+  }, []);
 
   async function handleDelete(id: string): Promise<void> {
     try {
-      api.delete(`v2/store/category/${id}`, {
+      await api.delete(`v2/store/category/${id}`, {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       });
+
+      setCategories(categories.filter(category => category.id !== id));
     } catch (err) {
       console.log(err);
     }
@@ -96,7 +106,13 @@ const Dashboard: React.FC = () => {
 
       <Grid className={classes.grid}>
         <h1>Lista de Categorias</h1>
-        <GoCreate />
+
+        <Link to="create">
+        <Button className={classes.submit} type="button">
+        Criar uma nova categoria
+      </Button>
+        </Link>
+
       </Grid>
 
       <TableContainer component={Paper}>
