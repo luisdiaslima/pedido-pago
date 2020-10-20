@@ -21,6 +21,7 @@ import api from 'services/api';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import EditIcon from '@material-ui/icons/Edit';
 import { useAuth } from 'hooks/auth';
+import { Container } from './styles';
 
 import logoImg from '../../assets/logo.svg';
 
@@ -129,11 +130,6 @@ const Dashboard: React.FC = () => {
                 <TableCell align="right">{category.created_at}</TableCell>
                 <TableCell
                   align="right"
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'row',
-                    justifyContent: 'right',
-                  }}
                 >
                   <Link to={`edit/${category.id}`}>
                     <EditIcon />
