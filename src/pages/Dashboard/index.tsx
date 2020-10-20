@@ -25,6 +25,12 @@ import { Container } from './styles';
 
 import logoImg from '../../assets/logo.svg';
 
+interface ICategory {
+  id: string;
+  name: string;
+  created_at: string
+}
+
 const useStyles = makeStyles(theme => ({
   table: {
     minWidth: 650,
@@ -65,19 +71,23 @@ const useStyles = makeStyles(theme => ({
 }));
 
 const Dashboard: React.FC = () => {
-  const [categories, setCategories] = useState([
-    { id: '', name: '', created_at: '', logo: '' },
-  ]);
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
   const classes = useStyles();
   const { jwt } = useAuth();
 
   useEffect(() => {
-    api.get('v2/store/category').then(response => {
-        setCategories(response.data.items);
-    });
+    async function loadCategories(): Promise<void> {
+      const response = await api.get('/v2/store/category', {
+        headers: {
+          Authorization: `Bearer ${jwt}`
+        }
+      });
+      console.log(response.data.items)
+      setCategories(response.data.items);
+    }
 
-
+    loadCategories();
   }, []);
 
   async function handleDelete(id: string): Promise<void> {
@@ -124,7 +134,9 @@ const Dashboard: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {categories.map(category => (
+            {
+            categories &&
+            categories.map(category => (
               <TableRow key={category.id}>
                 <TableCell>{category.name}</TableCell>
                 <TableCell align="right">{category.created_at}</TableCell>
