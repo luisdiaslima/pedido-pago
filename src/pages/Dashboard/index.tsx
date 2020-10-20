@@ -21,8 +21,6 @@ import api from 'services/api';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import EditIcon from '@material-ui/icons/Edit';
 import { useAuth } from 'hooks/auth';
-import GoCreate from '../../components/GoCreate';
-import { Container } from './styles';
 
 import logoImg from '../../assets/logo.svg';
 
