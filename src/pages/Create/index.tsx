@@ -22,6 +22,7 @@ import api from 'services/api';
 import { useAuth } from 'hooks/auth';
 
 import Input from '../../components/Input';
+import Select from '../../components/Select';
 
 import { Container } from './styles';
 import logoImg from '../../assets/logo.svg';
@@ -29,6 +30,7 @@ import logoImg from '../../assets/logo.svg';
 interface CategoryFormData {
   name: string;
   description: string;
+  visible: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -95,11 +97,13 @@ const Edit: React.FC = () => {
   const handleSubmit = useCallback(
     async (data: CategoryFormData) => {
       try {
+        const visible = data.visible === 'true';
         await api.post(
           'v2/store/category',
           {
             name: data.name,
             description: data.description,
+            visible,
           },
           {
             headers: {
@@ -145,7 +149,10 @@ const Edit: React.FC = () => {
             type="text"
             placeholder="Uma descrição curta"
           />
-
+          <Select name="visible">
+            <option value="true">Visível</option>
+            <option value="false">Não Visível</option>
+          </Select>
           <Button
             type="submit"
             fullWidth

@@ -12,7 +12,7 @@ import {
   TableContainer,
   TableRow,
   Paper,
-  Button
+  Button,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -28,7 +28,7 @@ import logoImg from '../../assets/logo.svg';
 interface ICategory {
   id: string;
   name: string;
-  created_at: string
+  created_at: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -80,10 +80,10 @@ const Dashboard: React.FC = () => {
     async function loadCategories(): Promise<void> {
       const response = await api.get('/v2/store/category', {
         headers: {
-          Authorization: `Bearer ${jwt}`
-        }
+          Authorization: `Bearer ${jwt}`,
+        },
       });
-      console.log(response.data.items)
+      console.log(response.data.items);
       setCategories(response.data.items);
     }
 
@@ -117,11 +117,10 @@ const Dashboard: React.FC = () => {
         <h1>Lista de Categorias</h1>
 
         <Link to="create">
-        <Button className={classes.submit} type="button">
-        Criar uma nova categoria
-      </Button>
+          <Button className={classes.submit} type="button">
+            Criar uma nova categoria
+          </Button>
         </Link>
-
       </Grid>
 
       <TableContainer component={Paper}>
@@ -134,26 +133,23 @@ const Dashboard: React.FC = () => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {
-            categories &&
-            categories.map(category => (
-              <TableRow key={category.id}>
-                <TableCell>{category.name}</TableCell>
-                <TableCell align="right">{category.created_at}</TableCell>
-                <TableCell
-                  align="right"
-                >
-                  <Link to={`edit/${category.id}`}>
-                    <EditIcon />
-                  </Link>
+            {categories &&
+              categories.map(category => (
+                <TableRow key={category.id}>
+                  <TableCell>{category.name}</TableCell>
+                  <TableCell align="right">{category.created_at}</TableCell>
+                  <TableCell align="right">
+                    <Link to={`edit/${category.id}`}>
+                      <EditIcon />
+                    </Link>
 
-                  <HighlightOffIcon
-                    className={classes.svg}
-                    onClick={() => handleDelete(category.id)}
-                  />
-                </TableCell>
-              </TableRow>
-            ))}
+                    <HighlightOffIcon
+                      className={classes.svg}
+                      onClick={() => handleDelete(category.id)}
+                    />
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>
