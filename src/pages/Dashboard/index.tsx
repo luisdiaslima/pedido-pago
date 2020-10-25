@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import {
@@ -21,14 +21,22 @@ import api from 'services/api';
 import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import EditIcon from '@material-ui/icons/Edit';
 import { useAuth } from 'hooks/auth';
-import { Container } from './styles';
+import { Container, TableMotion } from './styles';
+import ModalDeleteFood from '../../components/ModalDeleteFood';
+import ModalEditCategory from '../../components/ModalEditCategory';
 
 import logoImg from '../../assets/logo.svg';
 
 interface ICategory {
-  id: string;
+  id: number;
   name: string;
+  description: string;
   created_at: string;
+}
+
+interface IDataCategory {
+  name: string;
+  description: string;
 }
 
 const useStyles = makeStyles(theme => ({
@@ -36,13 +44,15 @@ const useStyles = makeStyles(theme => ({
     minWidth: 650,
   },
   submit: {
+    width: '226px',
+    height: '36px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontFamily: 'Poppins',
-    margin: theme.spacing(3, 0, 2),
+    borderRadius: '99px',
+    textTransform: 'lowercase',
     background: '#22E0A1',
-    marginTop: theme.spacing(5),
     '&:hover': {
       backgroundColor: '#034AFD',
     },
@@ -72,6 +82,14 @@ const useStyles = makeStyles(theme => ({
 
 const Dashboard: React.FC = () => {
   const [categories, setCategories] = useState<ICategory[]>([]);
+  const [deletingCategory, setDeletingCategory] = useState<ICategory>(
+    {} as ICategory,
+  );
+  const [editingCategory, setEditingCategory] = useState<ICategory>(
+    {} as ICategory,
+  );
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const classes = useStyles();
   const { jwt } = useAuth();
@@ -88,24 +106,87 @@ const Dashboard: React.FC = () => {
     }
 
     loadCategories();
-  }, []);
+  }, [jwt]);
 
-  async function handleDelete(id: string): Promise<void> {
-    try {
-      await api.delete(`v2/store/category/${id}`, {
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      });
+  const handleDelete = useCallback(
+    async (id: number) => {
+      try {
+        await api.delete(`v2/store/category/${id}`, {
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        });
 
-      setCategories(categories.filter(category => category.id !== id));
-    } catch (err) {
-      console.log(err);
-    }
+        setCategories(categories.filter(category => category.id !== id));
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [jwt, categories],
+  );
+
+  const handleEdit = useCallback(
+    async (category: IDataCategory, id: number) => {
+      try {
+        const response = await api.put(
+          `v2/store/category/${id}`,
+          {
+            id,
+            ...category,
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          },
+        );
+
+        const parsedResponse = JSON.parse(response.config.data);
+
+        setCategories(
+          categories.map(mappedCategory =>
+            mappedCategory.id === id ? { ...parsedResponse } : mappedCategory,
+          ),
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    },
+    [jwt, categories],
+  );
+
+  function toggleDeleteModal(): void {
+    setDeleteModalOpen(!deleteModalOpen);
+  }
+
+  function handleDeleteCategory(category: ICategory): void {
+    setDeletingCategory(category);
+    toggleDeleteModal();
+  }
+
+  function toggleEditModal(): void {
+    setEditModalOpen(!editModalOpen);
+  }
+
+  function handleEditCategory(category: ICategory): void {
+    setEditingCategory(category);
+    toggleEditModal();
   }
 
   return (
     <Container className={classes.container}>
+      <ModalDeleteFood
+        isOpen={deleteModalOpen}
+        setIsOpen={toggleDeleteModal}
+        deletingCategory={deletingCategory}
+        handleDelete={handleDelete}
+      />
+      <ModalEditCategory
+        isOpen={editModalOpen}
+        setIsOpen={toggleEditModal}
+        editingCategory={editingCategory}
+        handleEdit={handleEdit}
+      />
       <AppBar color="default" className={classes.appbar}>
         <Toolbar>
           <img src={logoImg} alt="Logo" />
@@ -123,36 +204,36 @@ const Dashboard: React.FC = () => {
         </Link>
       </Grid>
 
-      <TableContainer component={Paper}>
-        <Table className={classes.table} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell>Nome das Categorias</TableCell>
-              <TableCell align="right">Criação</TableCell>
-              <TableCell align="right">Ações</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {categories &&
-              categories.map(category => (
-                <TableRow key={category.id}>
-                  <TableCell>{category.name}</TableCell>
-                  <TableCell align="right">{category.created_at}</TableCell>
-                  <TableCell align="right">
-                    <Link to={`edit/${category.id}`}>
-                      <EditIcon />
-                    </Link>
+      <TableMotion animate={{ opacity: 1 }} initial={{ opacity: 0 }}>
+        <TableContainer component={Paper}>
+          <Table className={classes.table} aria-label="simple table">
+            <TableHead>
+              <TableRow>
+                <TableCell>Nome das Categorias</TableCell>
+                <TableCell align="right">Criação</TableCell>
+                <TableCell align="right">Ações</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {categories &&
+                categories.map(category => (
+                  <TableRow key={category.id}>
+                    <TableCell>{category.name}</TableCell>
+                    <TableCell align="right">{category.created_at}</TableCell>
+                    <TableCell align="right">
+                      <EditIcon onClick={() => handleEditCategory(category)} />
 
-                    <HighlightOffIcon
-                      className={classes.svg}
-                      onClick={() => handleDelete(category.id)}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+                      <HighlightOffIcon
+                        className={classes.svg}
+                        onClick={() => handleDeleteCategory(category)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </TableMotion>
     </Container>
   );
 };

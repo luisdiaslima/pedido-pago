@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { Form } from '@unform/web';
 
@@ -10,6 +10,7 @@ import {
   Avatar,
   CssBaseline,
   IconButton,
+  CircularProgress,
 } from '@material-ui/core';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -24,7 +25,7 @@ import { useAuth } from 'hooks/auth';
 import Input from '../../components/Input';
 import Select from '../../components/Select';
 
-import { Container } from './styles';
+import { Container, Paper, Loader } from './styles';
 import logoImg from '../../assets/logo.svg';
 
 interface CategoryFormData {
@@ -90,12 +91,14 @@ const useStyles = makeStyles(theme => ({
 const Edit: React.FC = () => {
   const classes = useStyles();
   const history = useHistory();
+  const [loading, setLoading] = useState(false);
 
   const { jwt } = useAuth();
   api.defaults.headers.Authorization = `Bearer ${jwt}`;
 
   const handleSubmit = useCallback(
     async (data: CategoryFormData) => {
+      setLoading(true);
       try {
         const visible = data.visible === 'true';
         await api.post(
@@ -117,6 +120,8 @@ const Edit: React.FC = () => {
         if (err) {
           console.log(err);
         }
+      } finally {
+        setLoading(false);
       }
     },
     [history, jwt],
@@ -124,13 +129,23 @@ const Edit: React.FC = () => {
 
   return (
     <Container>
+      {loading && (
+        <Loader>
+          <CircularProgress />
+        </Loader>
+      )}
+
       <AppBar color="default" className={classes.appbar}>
         <Toolbar>
           <img src={logoImg} alt="Logo" />
         </Toolbar>
       </AppBar>
       <CssBaseline />
-      <div className={classes.paper}>
+      <Paper
+        className={classes.paper}
+        animate={{ opacity: 1 }}
+        initial={{ opacity: 0 }}
+      >
         <IconButton onClick={history.goBack}>
           <ArrowBackIosIcon />
         </IconButton>
@@ -162,7 +177,7 @@ const Edit: React.FC = () => {
             Cadastrar
           </Button>
         </Form>
-      </div>
+      </Paper>
     </Container>
   );
 };
